@@ -40,6 +40,17 @@ if ! command -v nvidia-smi &>/dev/null; then
       software-properties-common \
       ubuntu-drivers-common
   ubuntu-drivers install --gpgpu || ubuntu-drivers autoinstall
+
+  # The --gpgpu metapackage installs the kernel module + libcompute but skips
+  # the userspace tools, so `nvidia-smi` would be missing. Pull it in
+  # explicitly. We discover the active driver branch from the kernel module
+  # package that ubuntu-drivers just installed.
+  DRV_BRANCH="$(dpkg -l 'linux-modules-nvidia-*-server-open-gcp' 2>/dev/null \
+      | awk '/^ii/ {print $2}' | grep -oE 'nvidia-[0-9]+-server' | head -1 \
+      | sed 's/nvidia-//;s/-server//')"
+  if [[ -n "$DRV_BRANCH" ]]; then
+    apt-get install -y --no-install-recommends "nvidia-utils-${DRV_BRANCH}-server" || true
+  fi
   echo "[setup] NVIDIA driver installed. A REBOOT is required before docker --gpus works."
 else
   echo "[setup] nvidia-smi already present, skipping driver install:"
