@@ -1,2 +1,4 @@
 gradio>=4.44,<5
-huggingface_hub>=0.24
+# gradio 4.x imports HfFolder which was removed in huggingface_hub 1.0,
+# so pin to the last 0.x release.
+huggingface_hub>=0.24,<1.0
