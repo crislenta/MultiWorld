@@ -256,7 +256,6 @@ def main():
         server_name=args.host,
         server_port=args.port,
         share=args.share,
-        show_api=False,
     )
 
 
