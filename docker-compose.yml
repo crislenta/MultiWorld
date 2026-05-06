@@ -1,0 +1,29 @@
+services:
+  multiworld-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: multiworld-ui:latest
+    container_name: multiworld-ui
+    restart: unless-stopped
+    shm_size: "16g"
+    ports:
+      - "7860:7860"
+    environment:
+      GRADIO_HOST: 0.0.0.0
+      GRADIO_PORT: 7860
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN:-}
+      MODELSCOPE_API_TOKEN: ${MODELSCOPE_API_TOKEN:-}
+    volumes:
+      # Persist the (very large) model weights and checkpoints across runs.
+      - ./checkpoints:/workspace/checkpoints
+      - ./models:/workspace/models
+      - ./outputs:/workspace/outputs
+      - ./.cache:/workspace/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
